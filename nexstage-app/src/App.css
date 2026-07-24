@@ -135,9 +135,16 @@
   line-height: 1;
 }
 
-.logo-nex       { color: var(--black); }
-.logo-nex-light { color: var(--white); }
-.logo-stage     { color: var(--red); }
+.logo-nex {
+  background: linear-gradient(90deg, #111111 0%, #6B0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-nex-light  { color: var(--white); }
+.logo-stage      { color: var(--red); }
+.logo-stage-light { color: var(--white); }
 
 /* ─── Navbar ─────────────────────────────────────────────────────────────────── */
 
@@ -462,7 +469,27 @@
   font-size: 14px;
   color: var(--gray);
   line-height: 1.65;
+  flex: 1;
 }
+
+.feature-card-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.feature-cta {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.02em;
+  transition: gap var(--transition);
+}
+.feature-card-link:hover .feature-cta { letter-spacing: 0.06em; }
 
 /* ─── How It Works ───────────────────────────────────────────────────────────── */
 

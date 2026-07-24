@@ -1,4 +1,12 @@
 import { useState, useEffect } from 'react'
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
+import AreaBand from './pages/AreaBand'
+import AreaLocali from './pages/AreaLocali'
+import CommunityMusicisti from './pages/CommunityMusicisti'
+import SistemaMatching from './pages/SistemaMatching'
+import Registrazione from './pages/Registrazione'
+import PerBand from './pages/PerBand'
+import PerLocali from './pages/PerLocali'
 import './App.css'
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -46,30 +54,59 @@ function IconArrowDown() {
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 
 function NexStageLogo({ light = false }) {
+  const pick = light ? '#ffffff' : '#111111'
+  const note = light ? '#111111' : '#ffffff'
+
   return (
     <div className="logo-wrap">
-      <svg width="38" height="44" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Guitar pick + double eighth note — ricreato dall'immagine del logo */}
+      <svg width="46" height="52" viewBox="0 0 110 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Guitar pick — forma plettro: triangolo con tre angoli arrotondati */}
         <path
-          d="M50 4C70 4 92 22 92 50C92 74 68 98 50 112C32 98 8 74 8 50C8 22 30 4 50 4Z"
-          fill={light ? '#fff' : '#111'}
+          d="M55,5 C80,5 105,28 105,55 C105,82 80,108 55,120 C30,108 5,82 5,55 C5,28 30,5 55,5 Z"
+          fill={pick}
         />
-        <text
-          x="50" y="74"
-          textAnchor="middle"
-          fontSize="44"
-          fontWeight="bold"
-          fill={light ? '#111' : '#fff'}
-          fontFamily="serif"
-        >
-          ♪
-        </text>
+        {/* Nota testa 1 (sinistra) */}
+        <ellipse cx="38" cy="90" rx="12" ry="8.5" transform="rotate(-28 38 90)" fill={note} />
+        {/* Nota testa 2 (destra) */}
+        <ellipse cx="67" cy="75" rx="12" ry="8.5" transform="rotate(-28 67 75)" fill={note} />
+        {/* Gambo 1 */}
+        <rect x="47" y="40" width="5" height="52" rx="2.5" fill={note} />
+        {/* Gambo 2 */}
+        <rect x="76" y="24" width="5" height="52" rx="2.5" fill={note} />
+        {/* Traversa (beam) */}
+        <path d="M47,42 L81,26 L81,38 L47,54 Z" fill={note} />
       </svg>
+
       <span className="logo-text">
         <span className={light ? 'logo-nex-light' : 'logo-nex'}>nex</span>
-        <span className="logo-stage">stage</span>
+        <span className={light ? 'logo-stage-light' : 'logo-stage'}>stage</span>
       </span>
     </div>
   )
+}
+
+// ─── Scroll hook ─────────────────────────────────────────────────────────────
+// HashRouter usa # per le route, quindi href="#id" rompe la navigazione.
+// Questo hook naviga prima a "/" se necessario, poi esegue lo scroll.
+
+function useScrollTo() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  return (id) => (e) => {
+    e.preventDefault()
+    const scroll = () => {
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }
+    if (location.pathname !== '/') {
+      navigate('/')
+      setTimeout(scroll, 120)
+    } else {
+      scroll()
+    }
+  }
 }
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
@@ -77,6 +114,7 @@ function NexStageLogo({ light = false }) {
 function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const scrollTo = useScrollTo()
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60)
@@ -85,18 +123,19 @@ function Navbar() {
   }, [])
 
   const close = () => setOpen(false)
+  const goTo = (id) => (e) => { close(); scrollTo(id)(e) }
 
   return (
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
-      <a href="#home" className="navbar-logo" onClick={close}>
+      <Link to="/" className="navbar-logo" onClick={close}>
         <NexStageLogo light />
-      </a>
+      </Link>
 
       <ul className={`nav-links ${open ? 'nav-links--open' : ''}`}>
-        <li><a href="#target" onClick={close}>Chi Siamo</a></li>
-        <li><a href="#features" onClick={close}>Funzionalità</a></li>
-        <li><a href="#how" onClick={close}>Come Funziona</a></li>
-        <li><a href="#cta" className="btn btn-primary btn-sm" onClick={close}>Unisciti</a></li>
+        <li><a href="#target"   onClick={goTo('target')}>Chi Siamo</a></li>
+        <li><a href="#features" onClick={goTo('features')}>Funzionalità</a></li>
+        <li><a href="#how"      onClick={goTo('how')}>Come Funziona</a></li>
+        <li><Link to="/registrazione" className="btn btn-primary btn-sm" onClick={close}>Unisciti</Link></li>
       </ul>
 
       <button
@@ -127,11 +166,11 @@ function Hero() {
           Trova la tua prossima esibizione o il tuo artista ideale.
         </p>
         <div className="hero-buttons">
-          <a href="#cta" className="btn btn-primary btn-lg">Sono una Band</a>
-          <a href="#cta" className="btn btn-outline btn-lg">Sono un Locale</a>
+          <Link to="/per-band" className="btn btn-primary btn-lg">Sono una Band</Link>
+          <Link to="/per-locali" className="btn btn-outline btn-lg">Sono un Locale</Link>
         </div>
       </div>
-      <a href="#target" className="hero-scroll-hint">
+      <a href="#target" className="hero-scroll-hint" onClick={(e) => { e.preventDefault(); document.getElementById('target')?.scrollIntoView({ behavior: 'smooth' }) }}>
         <span>Scopri di più</span>
         <IconArrowDown />
       </a>
@@ -200,21 +239,25 @@ const features = [
     Icon: IconMusic,
     title: 'Area Band',
     desc: 'Profilo artistico, portfolio, video, demo, calendario eventi e ricerca locali compatibili.',
+    path: '/area-band',
   },
   {
     Icon: IconVenue,
     title: 'Area Locali',
     desc: 'Scheda locale, pubblicazione richieste artisti, gestione candidature e contatto diretto.',
+    path: '/area-locali',
   },
   {
     Icon: IconPeople,
     title: 'Community Musicisti',
     desc: 'Ricerca componenti mancanti, annunci, collaborazioni artistiche, forum e messaggistica.',
+    path: '/community-musicisti',
   },
   {
     Icon: IconMatch,
     title: 'Sistema di Matching',
     desc: 'Suggerimenti automatici basati su posizione geografica, genere, disponibilità ed esperienza.',
+    path: '/sistema-matching',
   },
 ]
 
@@ -228,13 +271,14 @@ function FeaturesSection() {
         </div>
         <div className="features-grid">
           {features.map((f) => (
-            <div key={f.title} className="feature-card">
+            <Link to={f.path} key={f.title} className="feature-card feature-card-link">
               <div className="feature-icon-wrap">
                 <f.Icon />
               </div>
               <h3 className="feature-title">{f.title}</h3>
               <p className="feature-desc">{f.desc}</p>
-            </div>
+              <span className="feature-cta">Scopri →</span>
+            </Link>
           ))}
         </div>
       </div>
@@ -326,11 +370,10 @@ function CTASection() {
           <br />Registrazione gratuita · Nessuna commissione nascosta
         </p>
         <div className="cta-buttons">
-          <a href="#" className="btn btn-white btn-lg">Registrati Gratis</a>
-          <a href="#features" className="btn btn-outline-white btn-lg">Scopri le funzionalità</a>
+          <Link to="/registrazione" className="btn btn-white btn-lg">Registrati Gratis</Link>
         </div>
         <p className="cta-note">
-          Progetto sviluppato durante il Percorso per le Competenze Trasversali e l'Orientamento (PCTO)
+          Progetto sviluppato in FSL (Formazione Scuola Lavoro)
         </p>
       </div>
     </section>
@@ -340,6 +383,8 @@ function CTASection() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
 function Footer() {
+  const scrollTo = useScrollTo()
+
   return (
     <footer className="footer">
       <div className="container">
@@ -353,29 +398,29 @@ function Footer() {
           <div className="footer-nav">
             <div className="footer-col">
               <span className="footer-col-title">Piattaforma</span>
-              <a href="#target">Chi Siamo</a>
-              <a href="#features">Funzionalità</a>
-              <a href="#how">Come Funziona</a>
+              <a href="#target"   onClick={scrollTo('target')}>Chi Siamo</a>
+              <a href="#features" onClick={scrollTo('features')}>Funzionalità</a>
+              <a href="#how"      onClick={scrollTo('how')}>Come Funziona</a>
             </div>
             <div className="footer-col">
               <span className="footer-col-title">Unisciti</span>
-              <a href="#cta">Per le Band</a>
-              <a href="#cta">Per i Locali</a>
-              <a href="#cta">Per i Musicisti</a>
+              <a href="#cta" onClick={scrollTo('cta')}>Per le Band</a>
+              <a href="#cta" onClick={scrollTo('cta')}>Per i Locali</a>
+              <a href="#cta" onClick={scrollTo('cta')}>Per i Musicisti</a>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2025 NexStage · Progetto PCTO · Tutti i diritti riservati</p>
+          <p>© 2025 NexStage · FSL (Formazione Scuola Lavoro) di Sofia Cominotto · Tutti i diritti riservati</p>
         </div>
       </div>
     </footer>
   )
 }
 
-// ─── App ─────────────────────────────────────────────────────────────────────
+// ─── Home ─────────────────────────────────────────────────────────────────────
 
-export default function App() {
+function HomePage() {
   return (
     <>
       <Navbar />
@@ -387,5 +432,22 @@ export default function App() {
       <CTASection />
       <Footer />
     </>
+  )
+}
+
+// ─── App ─────────────────────────────────────────────────────────────────────
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/area-band" element={<AreaBand />} />
+      <Route path="/area-locali" element={<AreaLocali />} />
+      <Route path="/community-musicisti" element={<CommunityMusicisti />} />
+      <Route path="/sistema-matching" element={<SistemaMatching />} />
+      <Route path="/registrazione" element={<Registrazione />} />
+      <Route path="/per-band"      element={<PerBand />} />
+      <Route path="/per-locali"    element={<PerLocali />} />
+    </Routes>
   )
 }

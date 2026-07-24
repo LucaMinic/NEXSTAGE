@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm create *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Utente\\\\Desktop\\\\AGENZIA\\\\RESTAINUP\\\\GITHUB\\\\NEXSTAGE\\\\nexstage-app\\\\src\\\\pages\")"
     ]
   }
 }
